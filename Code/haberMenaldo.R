@@ -2,12 +2,10 @@
 
 
 library(brms)
-library(rstanarm)
 library(tidyverse)
 library(fastDummies)
 library(haven)
-data <- read_dta("~/Dropbox/BayesChapter/Data/HaberMenaldoRepl.dta")
-
+data <- read_dta("~/Documents/GitHub/BayesModelSelection/Data/HaberMenaldoRepl.dta")
 
 #### from CPS article columns Table 2, cols 3,4
                                         #
@@ -17,16 +15,16 @@ data <- read_dta("~/Dropbox/BayesChapter/Data/HaberMenaldoRepl.dta")
 ### interacting oil with democracy lag
 
 
-model.data <- data[, c(names(data)[names(data) %in% c("hmccode", "year", "D_polity_s_interp", "L_Polity_s_interp", "L_Fiscal_Rel_interp", "D_Fiscal_Rel_Interp", "L_D_Fiscal_Rel_Interp", "L_logGDPPERCAP L_CivilWar", "L_REGION_DEM_DIFFUSE", "L_WORLD_DEM_DIFFUSE", "D_GDPPERCAP", "D_RegionalDiffusion", "D_WORLD_DEM_DIFFUSE", names(data)[c(58:74, 137:151, 153:196, 198:281)])])]
+data <- data[, c(names(data)[names(data) %in% c("hmccode", "year", "D_polity_s_interp", "L_Polity_s_interp", "L_Fiscal_Rel_interp", "D_Fiscal_Rel_Interp", "L_D_Fiscal_Rel_Interp", "L_logGDPPERCAP L_CivilWar", "L_REGION_DEM_DIFFUSE", "L_WORLD_DEM_DIFFUSE", "D_GDPPERCAP", "D_RegionalDiffusion", "D_WORLD_DEM_DIFFUSE")])]
 
 
 
-model.data <- na.omit(model.data)
+model.data.HM <- na.omit(data)
 
+model.data.HM <- dummy_cols(model.data.HM, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
 
-
-formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data)[-c(1, 2, 3)],collapse="+"),sep=""))
-test <- lm(formula1, data = model.data)  ### pretty close
+### take out  "year_62"  "year_78"  "year_123" for HM
+formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data)[-c(1, 2, 3,97,152,168)],collapse="+"),sep=""))
 
 model_HM <- brm(formula = formula_HM, data = model.data, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15))
 save(model_HM,  file ="~/Dropbox/BayesChapter/Model_Results/model_HM.rda")
@@ -46,15 +44,55 @@ model_AR <- brm(formula = formula_AR, data = model.data.AR, family = gaussian(),
 save(model_AR,  file ="~/Dropbox/BayesChapter/Model_Results/model_AR.rda")
 
 ##### add inequality data and interaction with inequality
+### why does this take so long
+### how long does HM model take on 200 iterations? then add one by one variable
+model.data.ineq <- data
+model.data.ineq <- na.omit(model.data.ineq)
+dim(model.data.ineq)
+model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
 
-model.data.ineq <- model.data %>% left_join(data[, c("hmccode", "year", "very_unequal_utip")], by = c("hmccode", "year"))
-model.data.ineq <- model.data.ineq %>% mutate(unequal_L_FiscalReliance = very_unequal_utip * L_Fiscal_Rel_interp)
-model.data.ineq <- model.data.ineq %>% mutate(unequal_D_FiscalReliance = very_unequal_utip * D_Fiscal_Rel_Interp)
+formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
+tic()
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 200, chains = 1, cores = 1, control = list(max_treedepth = 16))
+toc()
+
+### add inequality
+model.data.ineq <- model.data %>% left_join(data[, c("hmccode", "year", "unequal_utip")], by = c("hmccode", "year"))
+model.data.ineq <- na.omit(model.data.ineq)
+dim(model.data.ineq)
+model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
+
+formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
+tic()
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 200, chains = 1, cores = 1, control = list(max_treedepth = 16))
+toc()
+
+
+model.data.ineq <- model.data.ineq %>% mutate(unequal_L_FiscalReliance = unequal_utip * L_Fiscal_Rel_interp)
+model.data.ineq <- na.omit(model.data.ineq)
+dim(model.data.ineq)
+model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
+
+formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
+tic()
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 200, chains = 1, cores = 1, control = list(max_treedepth = 16))
+toc()
+
+model.data.ineq <- model.data.ineq %>% mutate(unequal_D_FiscalReliance = unequal_utip * D_Fiscal_Rel_Interp)
+model.data.ineq <- na.omit(model.data.ineq)
+model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
+
+dim(model.data.ineq)
+formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
+tic()
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 200, chains = 1, cores = 1, control = list(max_treedepth = 16))
+toc()
+
 
 
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
 
-model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 250, chains = 4, cores = 4, control = list(max_treedepth = 16))
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 200, chains = 1, cores = 1, control = list(max_treedepth = 16))
 save(model_ineq, file ="~/Dropbox/BayesChapter/Model_Results/model_ineq.rda")
 
 
