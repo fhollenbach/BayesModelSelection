@@ -5,6 +5,7 @@ library(brms)
 library(tidyverse)
 library(fastDummies)
 library(haven)
+library(tictoc)
 data <- read_dta("~/Documents/GitHub/BayesModelSelection/Data/HaberMenaldoRepl.dta")
 
 #### from CPS article columns Table 2, cols 3,4
@@ -15,13 +16,13 @@ data <- read_dta("~/Documents/GitHub/BayesModelSelection/Data/HaberMenaldoRepl.d
 ### interacting oil with democracy lag
 
 
-data <- data[, c(names(data)[names(data) %in% c("hmccode", "year", "D_polity_s_interp", "L_Polity_s_interp", "L_Fiscal_Rel_interp", "D_Fiscal_Rel_Interp", "L_D_Fiscal_Rel_Interp", "L_logGDPPERCAP L_CivilWar", "L_REGION_DEM_DIFFUSE", "L_WORLD_DEM_DIFFUSE", "D_GDPPERCAP", "D_RegionalDiffusion", "D_WORLD_DEM_DIFFUSE")])]
+data_sub <- data[, c(names(data)[names(data) %in% c("hmccode", "year", "D_polity_s_interp", "L_Polity_s_interp", "L_Fiscal_Rel_interp", "D_Fiscal_Rel_Interp", "L_D_Fiscal_Rel_Interp", "L_logGDPPERCAP L_CivilWar", "L_REGION_DEM_DIFFUSE", "L_WORLD_DEM_DIFFUSE", "D_GDPPERCAP", "D_RegionalDiffusion", "D_WORLD_DEM_DIFFUSE")])]
 
 
 
-model.data.HM <- na.omit(data)
+model.data.HM <- na.omit(data_sub)
 
-model.data.HM <- dummy_cols(model.data.HM, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
+model.data.HM <- dummy_cols(data_sub, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
 
 ### take out  "year_62"  "year_78"  "year_123" for HM
 formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data)[-c(1, 2, 3,97,152,168)],collapse="+"),sep=""))
@@ -46,7 +47,7 @@ save(model_AR,  file ="~/Dropbox/BayesChapter/Model_Results/model_AR.rda")
 ##### add inequality data and interaction with inequality
 ### why does this take so long
 ### how long does HM model take on 200 iterations? then add one by one variable
-model.data.ineq <- data
+model.data.ineq <- data_sub
 model.data.ineq <- na.omit(model.data.ineq)
 dim(model.data.ineq)
 model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
@@ -57,7 +58,7 @@ model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gauss
 toc()
 
 ### add inequality
-model.data.ineq <- model.data %>% left_join(data[, c("hmccode", "year", "unequal_utip")], by = c("hmccode", "year"))
+model.data.ineq <- model.data.HM %>% left_join(data[, c("hmccode", "year", "unequal_utip")], by = c("hmccode", "year"))
 model.data.ineq <- na.omit(model.data.ineq)
 dim(model.data.ineq)
 model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
@@ -69,9 +70,6 @@ toc()
 
 
 model.data.ineq <- model.data.ineq %>% mutate(unequal_L_FiscalReliance = unequal_utip * L_Fiscal_Rel_interp)
-model.data.ineq <- na.omit(model.data.ineq)
-dim(model.data.ineq)
-model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
 
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
 tic()
