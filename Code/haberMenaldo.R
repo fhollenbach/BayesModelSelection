@@ -7,7 +7,7 @@ library(fastDummies)
 library(haven)
 library(tictoc)
 data <- read_dta("~/Documents/GitHub/BayesModelSelection/Data/HaberMenaldoRepl.dta")
-
+names(data)
 #### from CPS article columns Table 2, cols 3,4
                                         #
 ### one haber & menaldo -
@@ -25,7 +25,9 @@ model.data.HM <- na.omit(data_sub)
 model.data.HM <- dummy_cols(data_sub, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
 
 ### take out  "year_62"  "year_78"  "year_123" for HM
-formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data)[-c(1, 2, 3,97,152,168)],collapse="+"),sep=""))
+formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.HM)[-c(1, 2, 3,97,152,168)],collapse="+"),sep=""))
+lm(formula_HM, data = model.data.HM)
+
 
 model_HM <- brm(formula = formula_HM, data = model.data, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15))
 save(model_HM,  file ="~/Dropbox/BayesChapter/Model_Results/model_HM.rda")
