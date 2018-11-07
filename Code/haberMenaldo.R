@@ -16,7 +16,7 @@ names(data)
 ### interacting oil with democracy lag
 
 
-data_sub <- data[, c(names(data)[names(data) %in% c("hmccode", "year", "D_polity_s_interp", "L_Polity_s_interp", "L_Fiscal_Rel_interp", "D_Fiscal_Rel_Interp", "L_D_Fiscal_Rel_Interp", "L_logGDPPERCAP L_CivilWar", "L_REGION_DEM_DIFFUSE", "L_WORLD_DEM_DIFFUSE", "D_GDPPERCAP", "D_RegionalDiffusion", "D_WORLD_DEM_DIFFUSE")])]
+data_sub <- data[, c(names(data)[names(data) %in% c("hmccode", "year", "D_polity_s_interp", "L_Polity_s_interp", "L_Fiscal_Rel_interp", "D_Fiscal_Rel_Interp", "L_D_Fiscal_Rel_Interp", "L_logGDPPERCAP", "L_CivilWar", "L_REGION_DEM_DIFFUSE", "L_WORLD_DEM_DIFFUSE", "D_GDPPERCAP", "D_RegionalDiffusion", "D_WORLD_DEM_DIFFUSE")])]
 
 
 
@@ -96,7 +96,8 @@ model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gauss
 save(model_ineq, file ="~/Dropbox/BayesChapter/Model_Results/model_ineq.rda")
 
 
-
+test <- data %>% group_by(year) %>% summarise(min = min(world_dem_diffuse, na.rm = T), max = max(world_dem_diffuse, na.rm = T), mean = mean(world_dem_diffuse,na.rm = T))
+= first(NAME.corrected), NAME = first(NAME), TYPE = mean(as.numeric(as.character(TYPE))), RB = first(RB)) %>% arrange(NAME.corrected)
 
 ### now interaction with polity lag
 model.data.lag <-  model.data %>% mutate(polity_L_FiscalReliance = L_Polity_s_interp * L_Fiscal_Rel_interp)
