@@ -15,6 +15,10 @@ names(data)
 ### haber menaldo model with inequality measure and interaction of oil and inequ (dunning 2008)
 ### interacting oil with democracy lag
 
+test <- data %>% group_by(year) %>% summarise(mean_L = mean(L_WORLD_DEM_DIFFUSE), min_L = min(L_WORLD_DEM_DIFFUSE), max_L = max(L_WORLD_DEM_DIFFUSE),
+                             mean_D = mean(D_World_Dem_Diffuse), min_L = min(D_World_Dem_Diffuse), max_L = max(D_World_Dem_Diffuse))
+test$mean_L == test$max_L == test$min_L
+test$mean_D == test$max_D == test$min_D
 
 
 data_sub <- data %>% select(c(hmccode, year, D_polity_s_interp, L_Polity_s_interp, L_tot_oil_inc_interp, D_tot_oil_inc_interp, L_LogPerCapGDP_interp, L_CivilWar_interp, L_REGION_DEM_DIFFUSE, L_WORLD_DEM_DIFFUSE, D_LogperCapGDP_int, D_Region_Dem_Diffuse, D_World_Dem_Diffuse, very_unequal_utip))
