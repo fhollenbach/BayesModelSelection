@@ -55,6 +55,11 @@ dim(model.data.ineq)
 model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode", "year"), remove_first_dummy = TRUE)
 
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
+check <- lm(formula_ineq, data = model.data.ineq)
+
+model.data.ineq <- model.data.ineq %>% select(-c(names(check$coefficients[is.na(check$coefficients)])))
+formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
+
 tic()
 model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 100, iter = 200, chains = 1, cores = 1, control = list(max_treedepth = 16))
 toc()
