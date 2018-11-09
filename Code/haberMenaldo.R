@@ -23,12 +23,15 @@ data_sub <- na.omit(data_sub)
 
 model.data.HM <- na.omit(data_sub)
 model.data.HM <- data_sub %>% select(-c(very_unequal_utip))
-model.data.HM <- dummy_cols(data_sub, select_columns = c("hmccode"), remove_first_dummy = TRUE)
+model.data.HM <- dummy_cols(model.data.HM, select_columns = c("hmccode"), remove_first_dummy = TRUE)
 
 ### take out  "year_62"  "year_78"  "year_123" for HM
 formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.HM)[-c(1, 2, 3)],collapse="+"),sep=""))
 test <- lm(formula_HM, data = model.data.HM)
 drop  <- names(test$coefficients[is.na(test$coefficients) == T])
+drop
+
+
 model.data.HM  <- model.data.HM %>% select(-c(drop))
 
 formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.HM)[-c(1, 2, 3)],collapse="+"),sep=""))
@@ -43,11 +46,15 @@ save(model_HM,  file ="~/Dropbox/BayesChapter/Model_Results/model_HM.rda")
 
 #### Andersen/Ross CPS 2015 model that includes interaction of post1980 and fiscal reliance
 ### Table 2 column 3
-model.data.AR <- data_sub %>% mutate(post1980 = case_when(year <= 1980 ~ 0,
-                                                          year > 1980 ~ 1))
+model.data.AR <- data_sub %>% select(-c(very_unequal_utip)) %>% mutate(post1980 = case_when(year <= 1980 ~ 0,
+                                                                                            year > 1980 ~ 1))
 model.data.AR <- model.data.AR %>% mutate(
   post1980_L_Fiscal_Rel_interp = post1980 * L_Fiscal_Rel_interp,
   post1980_D_Fiscal_Rel_Interp = post1980 * D_Fiscal_Rel_Interp)
+
+model.data.AR <- dummy_cols(model.data.AR, select_columns = c("hmccode"), remove_first_dummy = TRUE)
+
+
 
 formula_AR <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.AR)[-c(1, 2, 3)],collapse="+"),sep=""))
 test <- lm(formula_AR, data = model.data.AR)
@@ -72,6 +79,7 @@ model.data.ineq <- dummy_cols(model.data.ineq, select_columns = c("hmccode"), re
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
 test <- lm(formula_ineq, data = model.data.ineq)
 drop  <- names(test$coefficients[is.na(test$coefficients) == T])
+drop
 model.data.ineq  <- model.data.ineq %>% select(-c(drop))
 
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
@@ -82,8 +90,8 @@ toc()
 save(model_ineq, file ="~/Dropbox/BayesChapter/Model_Results/model_ineq.rda")
 
 ### now interaction with polity lag
-model.data.lag <-  data_sub %>% mutate(
-  polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
+model.data.lag <-  data_sub %>% select(-c(very_unequal_utip))  %>% mutate(
+                                                                       polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
   polity_D_Fiscal_Rel_Interp = L_Polity_s_interp * D_Fiscal_Rel_Interp)
 
 model.data.lag <- dummy_cols(model.data.lag, select_columns = c("hmccode"), remove_first_dummy = TRUE)
@@ -91,6 +99,7 @@ model.data.lag <- dummy_cols(model.data.lag, select_columns = c("hmccode"), remo
 formula_lag <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.lag)[-c(1, 2, 3)],collapse="+"),sep=""))
 test <- lm(formula_lag, data = model.data.lag)
 drop  <- names(test$coefficients[is.na(test$coefficients) == T])
+
 model.data.lag  <- model.data.lag %>% select(-c(drop))
 
 formula_lag <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.lag)[-c(1, 2, 3)],collapse="+"),sep=""))
