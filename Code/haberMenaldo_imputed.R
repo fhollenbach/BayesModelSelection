@@ -24,7 +24,7 @@ data_imp <- data_sub[complete.cases(select(data_sub, -c(very_unequal_utip))), ]
 
 missing <- data_imp %>% select(-c(hmccode, year))
 sbgImp <- sbgcop.mcmc(missing, nsamp=2100, odens = 3, seed=6886) ##2000 samples, only every 3 saved, 700 resulting
-
+save("~/Dropbox/BayesChapter/Model_Results/imputation.rda")
 
 
 sbgData = sbgImp$'Y.impute'[,,]
@@ -48,7 +48,7 @@ model.data.HM  <- model.data.HM %>% select(-c(drop))
 formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.HM)[-c(1, 2, 3)],collapse="+"),sep=""))
 
 tic()
-model_HM <- brm(formula = formula_HM, data = model.data.HM, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15))
+model_HM <- brm(formula = formula_HM, data = model.data.HM, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T)
 toc()
 save(model_HM,  file ="~/Dropbox/BayesChapter/Model_Results/model_HM_.rda")
 
@@ -73,7 +73,7 @@ drop  <- names(test$coefficients[is.na(test$coefficients) == T])
 drop
 
 tic()
-model_AR <- brm(formula = formula_AR, data = model.data.AR, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 30))
+model_AR <- brm(formula = formula_AR, data = model.data.AR, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 30), save_all_pars =T)
 toc()
 save(model_AR,  file ="~/Dropbox/BayesChapter/Model_Results/model_AR_imp.rda")
 
@@ -96,14 +96,14 @@ model.data.ineq  <- model.data.ineq %>% select(-c(drop))
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
 
 tic()
-model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 16))
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 16), save_all_pars =T)
 toc()
 save(model_ineq, file ="~/Dropbox/BayesChapter/Model_Results/model_ineq_imp.rda")
 
 ### now interaction with polity lag
 model.data.lag <-  model.data %>% select(-c(very_unequal_utip))  %>% mutate(
                                                                          polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
-                                                                       polity_D_Fiscal_Rel_Interp = L_Polity_s_interp * D_Fiscal_Rel_Interp)
+                                                                         polity_D_Fiscal_Rel_Interp = L_Polity_s_interp * D_Fiscal_Rel_Interp)
 
 model.data.lag <- dummy_cols(model.data.lag, select_columns = c("hmccode"), remove_first_dummy = TRUE)
 
@@ -116,6 +116,6 @@ model.data.lag  <- model.data.lag %>% select(-c(drop))
 formula_lag <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.lag)[-c(1, 2, 3)],collapse="+"),sep=""))
 
 tic()
-model_lag <- brm(formula = formula_lag, data = model.data.lag, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15))
+model_lag <- brm(formula = formula_lag, data = model.data.lag, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T)
 toc()
 save(model_lag,  file ="~/Dropbox/BayesChapter/Model_Results/model_lag_imp.rda")
