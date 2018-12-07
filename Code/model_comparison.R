@@ -1,11 +1,17 @@
 library(bayesplot)
 library(brms)
 library(rethinking)
-
+library(tidyverse)
+library(tidybayes)
 load("~/Dropbox/BayesChapter/Model_Results/model_HM_imp.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model_AR_imp.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model_lag_imp.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model_ineq_imp.rda")
+
+vars <- get_variables(model_HM)
+
+model.HM <- model_HM %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp / b_L_Polity_s_interp)
+
 
 
 info_crit <- function(model){
@@ -27,6 +33,7 @@ info_HM  <- info_crit(model_HM)
 info_AR <- info_crit(model_AR)
 info_ineq <- info_crit(model_ineq)
 info_lag <- info_crit(model_lag)
+
 
 
 ### waic
