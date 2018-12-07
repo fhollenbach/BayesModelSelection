@@ -32,13 +32,6 @@ logLik_fun <- function(model, type){
 }
 
 
-
-vars <- get_variables(model_HM)
-
-model.HM <- model_HM %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.5))
-m
-mcmc_intervals(select(model.HM, -c(.chain, .iteration, .draw)))
-
 info_crit <- function(model){
 
     log_likelihood <- logLik_fun(model, type = "median")### log likelihood based on median para
@@ -55,6 +48,18 @@ info_crit <- function(model){
     ret  <- tibble(aic = aic, deviance = deviance, dic = dic, bic = bic)
     return(ret)
 }
+
+
+
+
+
+
+vars <- get_variables(model_HM)
+
+model.HM <- model_HM %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.5))
+m
+mcmc_intervals(select(model.HM, -c(.chain, .iteration, .draw)))
+
 
 
 ### deivance based on median estimate aic, dic, bic,
