@@ -19,7 +19,7 @@ logLik_fun <- function(model, type){
     if(type == "mean"){
         estimates <- posterior_samples(model) %>% apply(2, mean)
     }
-    para <- estimates[-c(which(names(post_median) %in% c("sigma", "lp__")))]
+    para <- estimates[-c(which(names(estimates) %in% c("sigma", "lp__", "temp_Intercept")))]
     intercept <- as.tibble(rep(1, n))
     names(intercept) <- "intercept"
     data  <- bind_cols(intercept, model$data[, -c(which(names(model$data) == "D_polity_s_interp"))])
@@ -45,7 +45,7 @@ info_crit <- function(model){
 
     deviance_mean <- -2 * logLik_fun(model, type = "mean") ### deviance based on mean parameter
     dic  <-  mean_deviance + (deviance_mean -  mean_deviance) ## dic based on  deviance estimates
-    ret  <- tibble(aic = aic, deviance = deviance, dic = dic, bic = bic)
+    ret  <- tibble(AIC = aic, Deviance = deviance, DIC = dic, BIC = bic)
     return(ret)
 }
 
@@ -69,9 +69,34 @@ info_ineq <- info_crit(model_ineq)
 info_lag <- info_crit(model_lag)
 
 
+####
+### make Table with info criteria
+models_criteria <- bind_rows(info_HM, info_AR, info_ineq, info_lag)
+Model  <-as.tibble(c("HM", "AR", "Inequality", "Polity"))
+names(Model) <- "Model"
+models_criteria <- bind_cols(Model, models_criteria)
+
+table  <- xtable(models_criteria, digits = 1, caption = "Information Critera", label = "tab:infoCrit", align = "llcccc")
+print(table, include.rownames = FALSE, booktabs = TRUE)
+
+
+names(models) <- "Model"
 
 ### waic
-waic(model_HM, model_AR, model_ineq, model_lag)
+waic.hm <- waic(model_HM)$estimate[3, ]
+waic.ar <- waic(model_AR)$estimate[3, ]
+waic.ineq <- waic(model_ineq)$estimate[3, ]
+waic.lag <- waic(model_lag)$estimate[3, ]
+
+waic  <- models_criteria <- bind_rows(waic.hm, waic.ar, waic.ineq, waic.lag)
+Model  <-as.tibble(c("HM", "AR", "Inequality", "Polity"))
+names(Model) <- "Model"
+models_waic <- bind_cols(Model, waic)
+
+table  <- xtable(models_waic, digits = 2, caption = "WAIC for all Models", label = "tab:waic", align = "llcc")
+print(table, include.rownames = FALSE, booktabs = TRUE)
+
+
 
 #### bayesfactor
-bayes_factor(model_HM, model_AR, model_ineq, model_lag)
+    bayes_factor(model_HM, model_AR, model_ineq, model_lag)
