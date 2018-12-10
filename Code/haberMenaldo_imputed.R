@@ -56,9 +56,9 @@ get_prior(formula_HM, data = model.data.HM, family = gaussian())
 prior = c(set_prior("normal(0,4)", class = "b"), set_prior("normal(0,4)", class = "Intercept"))
 
 tic()
-model_HM <- brm(formula = formula_HM, data = model.data.HM, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, cor_ar(~year | hmccode, p = 3), seed = 1234)
+model_HM <- brm(formula = formula_HM, data = model.data.HM, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, seed = 1234)
 toc()
-save(model_HM,  file ="~/Dropbox/BayesChapter/Model_Results/model_HM_.rda")
+save(model_HM,  file ="~/Dropbox/BayesChapter/Model_Results/model_HM_imp.rda")
 
 
 
@@ -81,7 +81,7 @@ drop  <- names(test$coefficients[is.na(test$coefficients) == T])
 drop
 
 tic()
-model_AR <- brm(formula = formula_AR, data = model.data.AR, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, cor_ar(~year | hmccode, p = 3), seed = 1234)
+model_AR <- brm(formula = formula_AR, data = model.data.AR, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, seed = 1234)
 toc()
 save(model_AR,  file ="~/Dropbox/BayesChapter/Model_Results/model_AR_imp.rda")
 
@@ -104,7 +104,7 @@ model.data.ineq  <- model.data.ineq %>% select(-c(drop))
 formula_ineq <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.ineq)[-c(1, 2, 3)],collapse="+"),sep=""))
 
 tic()
-model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, cor_ar(~year | hmccode, p = 3), seed = 1234)
+model_ineq <- brm(formula = formula_ineq, data = model.data.ineq, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, seed = 1234)
 toc()
 save(model_ineq, file ="~/Dropbox/BayesChapter/Model_Results/model_ineq_imp.rda")
 
@@ -124,6 +124,6 @@ model.data.lag  <- model.data.lag %>% select(-c(drop))
 formula_lag <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.lag)[-c(1, 2, 3)],collapse="+"),sep=""))
 
 tic()
-model_lag <- brm(formula = formula_lag, data = model.data.lag, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, cor_ar(~year | hmccode, p = 3), seed = 1234)
+model_lag <- brm(formula = formula_lag, data = model.data.lag, family = gaussian(), warmup = 1000, iter = 2500, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, seed = 1234)
 toc()
 save(model_lag,  file ="~/Dropbox/BayesChapter/Model_Results/model_lag_imp.rda")
