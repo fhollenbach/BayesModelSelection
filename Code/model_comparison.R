@@ -171,7 +171,7 @@ waic.ar <- waic(model_AR)$estimate[3, ]
 waic.ineq <- waic(model_ineq)$estimate[3, ]
 waic.lag <- waic(model_lag)$estimate[3, ]
 
-waic  <- models_criteria <- bind_rows(waic.hm, waic.ar, waic.ineq, waic.lag)
+waic   <- bind_rows(waic.hm, waic.ar, waic.ineq, waic.lag)
 Model  <-as.tibble(c("HM", "AR", "Inequality", "Polity"))
 names(Model) <- "Model"
 models_waic <- bind_cols(Model, waic)
@@ -183,3 +183,23 @@ print(table, include.rownames = FALSE, booktabs = TRUE)
 ### kfold
 
 kfold_cross  <- kfold(model_HM, model_AR, model_ineq, model_lag, compare = TRUE, k = 10)
+
+
+kfold.hm <- kfold_cross$model_HM$estimate[3,]
+kfold.ar <- kfold_cross$model_AR$estimate[3,]
+kfold.ineq <- kfold_cross$model_ineq$estimate[3,]
+kfold.lag <- kfold_cross$model_lag$estimate[3,]
+
+kfold <- bind_rows(kfold.hm, kfold.ar, kfold.ineq, kfold.lag)
+Model  <-as.tibble(c("HM", "AR", "Inequality", "Polity"))
+names(Model) <- "Model"
+models_kfold <- bind_cols(Model, kfold)
+
+table  <- xtable(models_kfold, digits = 2, caption = "Kfold Crossvalidation for all Models", label = "tab:kfold", align = "llcc")
+print(table, include.rownames = FALSE, booktabs = TRUE)
+
+
+
+### looo
+
+loo_models  <- loo(model_HM, model_AR, model_ineq, model_lag, compare = TRUE)
