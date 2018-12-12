@@ -7,6 +7,7 @@ library(fastDummies)
 library(haven)
 library(tictoc)
 library(sbgcop)
+library(rethinking)
 data <- read_dta("~/Documents/GitHub/BayesModelSelection/Data/HaberMenaldoRepl.dta")
 names(data)
 #### from CPS article columns Table 2, cols 3,4
@@ -24,7 +25,7 @@ data_imp <- data_sub[complete.cases(select(data_sub, -c(very_unequal_utip))), ]
 
 missing <- data_imp %>% select(-c(hmccode, year))
 sbgImp <- sbgcop.mcmc(missing, nsamp=2100, odens = 3, seed=6886) ##2000 samples, only every 3 saved, 700 resulting
-save("~/Dropbox/BayesChapter/Model_Results/imputation.rda")
+save(sbgImp, file ="~/Dropbox/BayesChapter/Model_Results/imputation.rda")
 
 
 sbgData = sbgImp$'Y.impute'[,,]
@@ -45,9 +46,31 @@ drop  <- names(test$coefficients[is.na(test$coefficients) == T])
 drop
 
 
-model.data.HM  <- model.data.HM %>% select(-c(drop))
+model.data.HM  <- data.frame(model.data.HM %>% select(-c(drop)))
 
 formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.HM)[-c(1, 2, 3)],collapse="+"),sep=""))
+
+
+
+
+
+
+mHM_rethinking <- map2stan(
+    alist(
+        D_polity_s_interp ~ dnorm( mu , sigma ) ,
+        mu <- a + b_lag_polity*L_Polity_s_interp + b_lag_fiscal*L_Fiscal_Rel_interp +
+            b_d_fiscal*D_Fiscal_Rel_Interp + b_l_d_fiscal*L_D_Fiscal_Rel_Interp + b_l_gdp*L_logGDPPERCAP +
+            b_l_civilwar*L_CivilWar + b_l_region*L_REGION_DEM_DIFFUSE + b_l_world*L_WORLD_DEM_DIFFUSE +
+            b_d_gdp*D_GDPPERCAP + b_d_region*D_RegionalDiffusion + b_d_world*D_WORLD_DEM_DIFFUSE +
+            b_70*hmccode_70 + b_101*hmccode_101 + b_130*hmccode_130 + b_155*hmccode_155 + b_385*hmccode_385 +
+            b_411*hmccode_411 + b_475*hmccode_475 + b_481*hmccode_481 + b_540*hmccode_540 + b_551*hmccode_551 +
+            b_615*hmccode_615 + b_630* hmccode_630 + b_679*hmccode_679 + b_690*hmccode_690 + b_692*hmccode_692 +
+            b_698*hmccode_698 + b_850*hmccode_850 ,
+        a ~ dnorm(0,5),
+        c(b_lag_polity, b_lag_fiscal, b_d_fiscal, b_l_d_fiscal, b_l_gdp, b_l_civilwar, b_l_region, b_l_world, b_d_gdp, b_d_region, b_d_world, b_70, b_101, b_130, b_155, b_385, b_411, b_475, b_481, b_540, b_551, b_615, b_630, b_679, b_690, b_692, b_698, b_850) ~ dnorm(0,5),
+        sigma ~ dcauchy(0,1)
+    ), data=model.data.HM, warmup = 1000, iter=4500,chains=4, WAIC=TRUE , cores=4)
+
 
 
 
