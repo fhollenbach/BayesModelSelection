@@ -4,53 +4,12 @@ library(rethinking)
 library(tidyverse)
 library(tidybayes)
 
+source("~/Documents/GitHub/BayesModelSelection/code/info_functions.R")
+
 load("~/Dropbox/BayesChapter/Model_Results/model_HM_imp.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model_AR_imp.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model_lag_imp.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model_ineq_imp.rda")
-
-
-
-logLik_fun <- function(model, type){
-    n  <- dim(model$data)[1]
-    data <- model$data
-    if(type == "median"){
-        estimates <- posterior_samples(model) %>% apply(2, median)
-    }
-    if(type == "mean"){
-        estimates <- posterior_samples(model) %>% apply(2, mean)
-    }
-    para <- estimates[-c(which(names(estimates) %in% c("sigma", "lp__", "temp_Intercept")))]
-    intercept <- as.tibble(rep(1, n))
-    names(intercept) <- "intercept"
-    data  <- bind_cols(intercept, data[, -c(which(names(data) == "D_polity_s_interp"))])
-    first  <- -(n / 2) * log(2 / pi)
-    second  <- n * log(sqrt(estimates["sigma"]))
-
-    third  <- (1 / (2 * estimates["sigma"])) * sum((model$data$D_polity_s_interp - (as.matrix(data)%*% as.matrix(para,nrow=1)))^2)
-    logLik <-first - second - third
-    return(logLik)
-}
-
-
-info_crit <- function(model){
-
-    log_likelihood <- logLik_fun(model, type = "median")### log likelihood based on median para
-    deviance <- -2 * log_likelihood ##deviance
-
-    aic  <-  deviance + 2 * (dim(summary(model)$fixed)[1]+1) ## aic based on deviance
-    bic  <- (log(summary(model)$nobs) * (dim(summary(model)$fixed)[1]+4)) - deviance ### bic based on deviance
-    dfLL <- model %>% log_lik() %>% as_tibble() ## returns log likelihood matrix for each obs and sample of the posterior
-    deviance_post  <- dfLL %>% mutate(sums     = rowSums(.), deviance = -2*sums) ### posterior of deviance, i.e., for each parameter in sample
-    mean_deviance <- mean(deviance_post$deviance) ## mean of posterior deviance
-
-    deviance_mean <- -2 * logLik_fun(model, type = "mean") ### deviance based on mean parameter
-    dic  <-  mean_deviance + (deviance_mean -  mean_deviance) ## dic based on  deviance estimates
-    ret  <- tibble(AIC = aic, Deviance = deviance, DIC = dic, BIC = bic)
-    return(ret)
-}
-
-
 
 
 
@@ -171,7 +130,7 @@ waic.ar <- waic(model_AR)$estimate[3, ]
 waic.ineq <- waic(model_ineq)$estimate[3, ]
 waic.lag <- waic(model_lag)$estimate[3, ]
 
-waic  <- models_criteria <- bind_rows(waic.hm, waic.ar, waic.ineq, waic.lag)
+waic   <- bind_rows(waic.hm, waic.ar, waic.ineq, waic.lag)
 Model  <-as.tibble(c("HM", "AR", "Inequality", "Polity"))
 names(Model) <- "Model"
 models_waic <- bind_cols(Model, waic)
@@ -183,3 +142,23 @@ print(table, include.rownames = FALSE, booktabs = TRUE)
 ### kfold
 
 kfold_cross  <- kfold(model_HM, model_AR, model_ineq, model_lag, compare = TRUE, k = 10)
+
+
+kfold.hm <- kfold_cross$model_HM$estimate[3,]
+kfold.ar <- kfold_cross$model_AR$estimate[3,]
+kfold.ineq <- kfold_cross$model_ineq$estimate[3,]
+kfold.lag <- kfold_cross$model_lag$estimate[3,]
+
+kfold <- bind_rows(kfold.hm, kfold.ar, kfold.ineq, kfold.lag)
+Model  <-as.tibble(c("HM", "AR", "Inequality", "Polity"))
+names(Model) <- "Model"
+models_kfold <- bind_cols(Model, kfold)
+
+table  <- xtable(models_kfold, digits = 2, caption = "Kfold Crossvalidation for all Models", label = "tab:kfold", align = "llcc")
+print(table, include.rownames = FALSE, booktabs = TRUE)
+
+
+
+### looo
+
+loo_models  <- loo(model_HM, model_AR, model_ineq, model_lag, compare = TRUE, reloo = TRUE)
