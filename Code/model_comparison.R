@@ -77,7 +77,7 @@ col.HM <- c(col.HM[1:24], rep(NA, 16), col.HM[25:28]) ### add 6 rows for AR, 6 f
 ##model AR
 vars <- get_variables(model_AR)[c(1:15, 33)]
 
-model.AR.95 <- model_AR %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_post1980, b_post1980_L_Fiscal_Rel_interp, b_post1980_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.95))
+model.AR.95 <- model_AR %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_post1980, b_post1980_L_Fiscal_Rel_interp, b_post1980_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% mutate(longRun_fiscal_post1980 =  b_post1980_L_Fiscal_Rel_interp/abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.95))
 vars  <- c(vars[1:15], "longRun_fiscal", vars[16])
 
 est  <- round(model.AR.95[vars], 3)
@@ -96,7 +96,7 @@ col.AR <- c(col.AR[1:30], rep(NA, 10), col.AR[31:34]) ### add 6 rows for ineq & 
 ##model ineq
 vars <- get_variables(model_ineq)[c(1:15, 33)]
 
-model.ineq.95 <- model_ineq %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_very_unequal_utip, b_unequal_L_Fiscal_Rel_interp, b_unequal_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.95))
+model.ineq.95 <- model_ineq %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_very_unequal_utip, b_unequal_L_Fiscal_Rel_interp, b_unequal_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% mutate(longRun_fiscal_ineq =  b_unequal_L_Fiscal_Rel_interp/abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.9))
 vars  <- c(vars[1:15], "longRun_fiscal", vars[16])
 
 est  <- round(model.ineq.95[vars], 3)
