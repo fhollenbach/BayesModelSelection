@@ -1,5 +1,5 @@
 clear
-import delimited "/Users/florianhollenbach/Dropbox/BayesChapter/Data/Haber_Menaldo_2011_APSR_Dataset.csv"
+import delimited "/Users/florianhollenbach/Documents/GitHub/BayesModelSelection/Data/Haber_Menaldo_2011_APSR_Dataset.csv"
 rename ïhmccode hmccode
 
 xtset hmccode year
@@ -40,6 +40,7 @@ generate D_GDPPERCAP = D.gdp_per_cap_haber_men_2
 generate D_RegionalDiffusion = D.region_dem_diffuse
 generate D_WORLD_DEM_DIFFUSE = D.world_dem_diffuse
 replace D_GDPPERCAP = D.log_gdp_per_cap_haber_men_2
+
 
 tabulate hmccode, generate(Ihmccode_)
 tabulate year, generate(year_)

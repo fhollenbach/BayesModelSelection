@@ -40,7 +40,7 @@ formula_HM <- as.formula(paste("D_polity_s_interp ~",paste(names(model.data.HM)[
 
 formula_HM
 
-prior = c(set_prior("normal(0,4)", class = "b"), set_prior("normal(0,4)", class = "Intercept"), set_prior("cauchy(0, 2)", class = "sigma"))
+prior = c(set_prior("normal(0,20)", class = "b"), set_prior("normal(0,20)", class = "Intercept"), set_prior("cauchy(0, 2)", class = "sigma"))
 
 model_HM <- brm(formula = formula_HM, data = model.data.HM, family = gaussian(), warmup = 1000, iter = 2000, chains = 4, cores = 4, control = list(max_treedepth = 15), save_all_pars =T, prior = prior, seed = 1234)
 
