@@ -142,18 +142,11 @@ model.data.full <-  model.data %>%  group_by(hmccode) %>% mutate(post1980 = case
                                                                  D_total_resources_income_pc = total_resources_income_pc - L_total_resources_income_pc,
                                                                  post1980_L_Fiscal_Rel_interp = post1980 * L_Fiscal_Rel_interp,
                                                                  post1980_D_Fiscal_Rel_Interp = post1980 * D_Fiscal_Rel_Interp,
-                                                                 post19080_L_total_resources_income_pc = post1980*L_total_resources_income_pc,
-                                                                 post19080_D_total_resources_income_pc = post1980*D_total_resources_income_pc,
-                                                                 unequal_L_Fiscal_Rel_interp = L_very_unequal_utip * L_Fiscal_Rel_interp,
+                                                                unequal_L_Fiscal_Rel_interp = L_very_unequal_utip * L_Fiscal_Rel_interp,
                                                                  unequal_D_Fiscal_Rel_Interp = D_very_unequal_utip * D_Fiscal_Rel_Interp,
-                                                                 unequal_L_total_resources_income_pc = L_very_unequal_utip * L_total_resources_income_pc,
-                                                                 unequal_D_total_resources_income_pc = D_very_unequal_utip * D_total_resources_income_pc,
-                                                                 polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
-                                                                 polity_L_total_resources_income_pc = L_Polity_s_interp * L_total_resources_income_pc,
+                                                                polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
                                                                  firstoil_L_Fiscal_Rel_interp = gdp_verylow_firstoil_year * L_Fiscal_Rel_interp,
-                                                                 firstoil_D_Fiscal_Rel_Interp = gdp_verylow_firstoil_year * D_Fiscal_Rel_Interp,
-                                                                 firstoil_L_total_resources_income_pc = gdp_verylow_firstoil_year*L_total_resources_income_pc,
-                                                                 firstoil_D_total_resources_income_pc = gdp_verylow_firstoil_year*D_total_resources_income_pc)
+                                                                 firstoil_D_Fiscal_Rel_Interp = gdp_verylow_firstoil_year * D_Fiscal_Rel_Interp)
                                                                  
 model.data.full <- model.data.full %>% select(-c(very_unequal_utip, total_resources_income_pc))                                                                 
 names(model.data.full)                                                                                               
