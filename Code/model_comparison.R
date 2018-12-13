@@ -3,6 +3,7 @@ library(brms)
 library(rethinking)
 library(tidyverse)
 library(tidybayes)
+library(xtable)
 
 source("~/Documents/GitHub/BayesModelSelection/code/info_functions.R")
 
@@ -28,7 +29,7 @@ CI <- data.frame(cbind(CI.low,CI.high))
 CI$interval <- paste("(", round(CI$X1,3), ",", round(CI$X2,3), ")", sep = "")
 
 col.HM <- unlist(sapply(seq_along(est), function(i) append(est[i], CI$interval[i], i)))
-col.HM <- c(col.HM[1:24], rep(NA, 16), col.HM[25:28]) ### add 6 rows for AR, 6 for ineq & 4 for lag model
+col.HM <- c(col.HM[1:24], rep(NA, 16), col.HM[25:28]) ### add 6 rows for AR, 8 for ineq & 2 for lag model
 
 
 
@@ -48,15 +49,15 @@ CI <- data.frame(cbind(CI.low,CI.high))
 CI$interval <- paste("(", round(CI$X1,3), ",", round(CI$X2,3), ")", sep = "")
 
 col.AR <- unlist(sapply(seq_along(est), function(i) append(est[i], CI$interval[i], i)))
-col.AR <- c(col.AR[1:30], rep(NA, 10), col.AR[31:34]) ### add 6 rows for ineq & 4 for lag model
+col.AR <- c(col.AR[1:30], rep(NA, 10), col.AR[31:34]) ### add 8 rows for ineq & 2 for lag model
 
 
 
 ##model ineq
-vars <- get_variables(model_ineq)[c(1:15, 33)]
+vars <- get_variables(model_ineq)[c(1:16, 34)]
 
-model.ineq.95 <- model_ineq %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_very_unequal_utip, b_unequal_L_Fiscal_Rel_interp, b_unequal_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% mutate(longRun_fiscal_ineq =  b_unequal_L_Fiscal_Rel_interp/abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.9))
-vars  <- c(vars[1:15], "longRun_fiscal", vars[16])
+model.ineq.95 <- model_ineq %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_L_very_unequal_utip, b_D_very_unequal_utip, b_unequal_L_Fiscal_Rel_interp, b_unequal_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% mutate(longRun_fiscal_ineq =  b_unequal_L_Fiscal_Rel_interp/abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.9))
+vars  <- c(vars[1:16], "longRun_fiscal", vars[17])
 
 est  <- round(model.ineq.95[vars], 3)
 CI.low <- matrix(as.numeric(model.ineq.95[paste(vars, "lower", sep = ".")]), ncol = 1)
@@ -67,15 +68,15 @@ CI <- data.frame(cbind(CI.low,CI.high))
 CI$interval <- paste("(", round(CI$X1,3), ",", round(CI$X2,3), ")", sep = "")
 
 col.ineq <- unlist(sapply(seq_along(est), function(i) append(est[i], CI$interval[i], i)))
-col.ineq <- c(col.ineq[1:24], rep(NA, 6), col.ineq[25:30], rep(NA, 4), col.ineq[31:34] ) ### add 6 rows for AR & 4 for lag model
+col.ineq <- c(col.ineq[1:24], rep(NA, 6), col.ineq[25:32], rep(NA, 2), col.ineq[33:36] ) ### add 6 rows for AR & 2 for lag model
 
 
 ##model lag
-vars <- get_variables(model_lag)[c(1:14, 32)]
+vars <- get_variables(model_lag)[c(1:13, 31)]
 
-model.lag.95 <- model_lag %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_polity_L_Fiscal_Rel_interp, b_polity_D_Fiscal_Rel_Interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.95))
+model.lag.95 <- model_lag %>% spread_draws(b_Intercept, b_L_Polity_s_interp, b_L_Fiscal_Rel_interp, b_D_Fiscal_Rel_Interp, b_L_D_Fiscal_Rel_Interp, b_L_logGDPPERCAP, b_L_CivilWar, b_L_REGION_DEM_DIFFUSE, b_L_WORLD_DEM_DIFFUSE, b_D_GDPPERCAP, b_D_RegionalDiffusion, b_D_WORLD_DEM_DIFFUSE, b_polity_L_Fiscal_Rel_interp, sigma) %>% mutate(longRun_fiscal =  b_L_Fiscal_Rel_interp /abs(b_L_Polity_s_interp)) %>% median_qi(.width = c(0.95))
 
-vars  <- c(vars[1:14], "longRun_fiscal", vars[15])
+vars  <- c(vars[1:13], "longRun_fiscal", vars[14])
 est  <- round(model.lag.95[vars], 3)
 CI.low <- matrix(as.numeric(model.lag.95[paste(vars, "lower", sep = ".")]), ncol = 1)
 row.names(CI.low) <- vars
@@ -85,7 +86,7 @@ CI <- data.frame(cbind(CI.low,CI.high))
 CI$interval <- paste("(", round(CI$X1,3), ",", round(CI$X2,3), ")", sep = "")
 
 col.lag <- unlist(sapply(seq_along(est), function(i) append(est[i], CI$interval[i], i)))
-col.lag <- c(col.lag[1:24], rep(NA, 12),col.lag[25:28], col.lag[29:32]) ### add 6 rows for AR & Ineq model
+col.lag <- c(col.lag[1:24], rep(NA, 14),col.lag[25:26], col.lag[27:30]) ### add 6 rows for AR & 8 for Ineq model
 
 
 length(col.HM)
@@ -93,7 +94,7 @@ length(col.AR)
 length(col.ineq)
 length(col.lag)
 
-vars <-tibble("Intercept", "Polity t-1", "Fiscal Reliance t-1", "$Delta$ Fiscal Reliance", "$Delta$ Fiscal Reliance t-1", "log GDP pC t-1", "Civil War t-1", "Regional dem diffusion t-1", "Global dem diffusion t-1", "$Delta$ log GDP pC", "$Delta$ Regional Dem Diffusion", "$Delta$ Global Dem Diffusion","post 1980", "post 1980 $times$ Fisc Rel t-1", "post 1980 $times$ $Delta$ Fisc Rel", "Inequality", "Inequality $times$ Fisc Rel t-1", "Inequality $times$ $Delta$ Fisc Rel", "Polity t-1 $times$ Fisc Rel t-1", "Polity t-1 $times$ $Delta$ Fisc Rel","Long Run Fisc Rel", "Sigma")
+vars <-tibble("Intercept", "Polity t-1", "Fiscal Reliance t-1", "$Delta$ Fiscal Reliance", "$Delta$ Fiscal Reliance t-1", "log GDP pC t-1", "Civil War t-1", "Regional dem diffusion t-1", "Global dem diffusion t-1", "$Delta$ GDP pC", "$Delta$ Regional Dem Diffusion", "$Delta$ Global Dem Diffusion","post 1980", "post 1980 $times$ Fisc Rel t-1", "post 1980 $times$ $Delta$ Fisc Rel", "Inequality t-1", "$Delta$ Inequality", "Inequality t-1 $times$ Fisc Rel t-1", "$Delta$ Inequality $times$ $Delta$ Fisc Rel", "Polity t-1 $times$ Fisc Rel t-1","Long Run Fisc Rel", "Sigma")
 vars_ci <- rep(NA, 22)
 names <- unlist(sapply(seq_along(vars), function(i) append(vars[i], vars_ci[i], i)))
 

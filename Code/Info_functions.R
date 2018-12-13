@@ -29,7 +29,7 @@ info_crit <- function(model){
     estimates_mean <- posterior_samples(model) %>% apply(2, mean)
     
     inits_median <- list(b = estimates_median[-which(names(estimates_median)%in%c("b_Intercept", "sigma", "temp_Intercept","lp__"))], temp_Intercept = estimates_median["temp_Intercept"], sigma = estimates_median["sigma"])
-    dat <- list(N= n, Y = data$D_polity_s_interp, K = dim(summary(model)$fixed)[1], X = as.matrix(cbind(rep(1,dim(model.data.HM)[1]),data[,-c(1)])))
+    dat <- list(N= n, Y = data$D_polity_s_interp, K = dim(summary(model)$fixed)[1], X = as.matrix(cbind(rep(1,dim(data)[1]),data[,-c(1)])))
     samp_median <- rstan::sampling(m , init=list(inits_median) , data= dat, pars="dev" ,chains=1 , iter=1 , cores=1 )
     deviance <- as.numeric(extract(samp_median,"dev") )
     
@@ -42,7 +42,7 @@ info_crit <- function(model){
     mean_deviance <- mean(deviance_post$deviance) ## mean of posterior deviance
     
     inits_mean <- list(b = estimates_mean[-which(names(estimates_mean)%in%c("b_Intercept", "sigma", "temp_Intercept","lp__"))], temp_Intercept = estimates_mean["temp_Intercept"], sigma = estimates_mean["sigma"])
-    dat <- list(N= n, Y = data$D_polity_s_interp, K = dim(summary(model)$fixed)[1], X = as.matrix(cbind(rep(1,dim(model.data.HM)[1]),data[,-c(1)])))
+    dat <- list(N= n, Y = data$D_polity_s_interp, K = dim(summary(model)$fixed)[1], X = as.matrix(cbind(rep(1,dim(data)[1]),data[,-c(1)])))
     samp_mean <- rstan::sampling(m , init=list(inits_mean) , data= dat, pars="dev" ,chains=1 , iter=1 , cores=1 )
     deviance_mean <- as.numeric(extract(samp_mean,"dev") )
     
