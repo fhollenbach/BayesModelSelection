@@ -17,15 +17,14 @@ names(data)
 ### haber menaldo model with inequality measure and interaction of oil and inequ (dunning 2008)
 ### interacting oil with democracy lag
 
-### last model with only lags and some additional variable: total_fuel_income_pc,total_resources_income_pc, gdp_verylow_firstoil_year, and reserves_interp_area
+### last model with only lags and some additional variable:  gdp_verylow_firstoil_year
 
 
-data_sub <- data %>% select(c(hmccode, year, D_polity_s_interp, L_Polity_s_interp, L_Fiscal_Rel_interp, D_Fiscal_Rel_Interp, L_D_Fiscal_Rel_Interp, L_logGDPPERCAP, L_CivilWar, L_REGION_DEM_DIFFUSE, L_WORLD_DEM_DIFFUSE,  D_GDPPERCAP, D_RegionalDiffusion, D_WORLD_DEM_DIFFUSE, very_unequal_utip,total_resources_income_pc, gdp_verylow_firstoil_year))
+data_sub <- data %>% select(c(hmccode, year, D_polity_s_interp, L_Polity_s_interp, L_Fiscal_Rel_interp, D_Fiscal_Rel_Interp, L_D_Fiscal_Rel_Interp, L_logGDPPERCAP, L_CivilWar, L_REGION_DEM_DIFFUSE, L_WORLD_DEM_DIFFUSE,  D_GDPPERCAP, D_RegionalDiffusion, D_WORLD_DEM_DIFFUSE, very_unequal_utip, gdp_verylow_firstoil_year))
 
-data_sub <- data_sub %>% mutate(L_very_unequal_utip = lag(very_unequal_utip, order_by = year),
-                                L_total_resources_income_pc = lag(total_resources_income_pc, order_by = year))
+data_sub <- data_sub %>% mutate(L_very_unequal_utip = lag(very_unequal_utip, order_by = year))
 
-data_imp <- data_sub[complete.cases(select(data_sub, -c(gdp_verylow_firstoil_year,very_unequal_utip, L_very_unequal_utip, total_resources_income_pc, L_total_resources_income_pc))), ]
+data_imp <- data_sub[complete.cases(select(data_sub, -c(gdp_verylow_firstoil_year,very_unequal_utip, L_very_unequal_utip))), ]
 
 
 missing <- data_imp %>% select(-c(hmccode, year))
@@ -37,11 +36,11 @@ sbgData = sbgImp$'Y.impute'[,,]
 mean_imp  <- as.tibble(apply(sbgImp$'Y.impute',c(1,2),mean))
 names(mean_imp) <- names(select(data_imp, -c(hmccode, year)))
 model.data  <- bind_cols(select(data_imp, c(hmccode, year)), mean_imp)
-all(model.data[, -c(15:19)] == data_imp[, -c(15:19)])
+all(model.data[, -c(15:17)] == data_imp[, -c(15:17)])
 
 
 
-model.data.HM <- model.data %>% select(-c(very_unequal_utip,total_resources_income_pc, gdp_verylow_firstoil_year, L_very_unequal_utip, L_total_resources_income_pc))
+model.data.HM <- model.data %>% select(-c(very_unequal_utip, gdp_verylow_firstoil_year, L_very_unequal_utip))
 model.data.HM <- dummy_cols(model.data.HM, select_columns = c("hmccode"), remove_first_dummy = TRUE)
 
 ### take out  "year_62"  "year_78"  "year_123" for HM
@@ -72,7 +71,7 @@ brms::stancode(model_HM)
 
 #### Andersen/Ross CPS 2015 model that includes interaction of post1980 and fiscal reliance
 ### Table 2 column 3
-model.data.AR <- model.data %>% select(-c(very_unequal_utip,total_resources_income_pc, gdp_verylow_firstoil_year, L_very_unequal_utip, L_total_resources_income_pc)) %>% mutate(post1980 = case_when(year <= 1980 ~ 0,
+model.data.AR <- model.data %>% select(-c(very_unequal_utip, gdp_verylow_firstoil_year, L_very_unequal_utip)) %>% mutate(post1980 = case_when(year <= 1980 ~ 0,
                                                                                                                                                                                                year > 1980 ~ 1))
 model.data.AR <- model.data.AR %>% mutate(post1980_L_Fiscal_Rel_interp = post1980 * L_Fiscal_Rel_interp,
                                        post1980_D_Fiscal_Rel_Interp = post1980 * D_Fiscal_Rel_Interp)
@@ -95,7 +94,7 @@ save(model_AR,  file ="~/Dropbox/BayesChapter/Model_Results/model_AR_imp.rda")
 ### why does this take so long
 ### how long does HM model take on 200 iterations? then add one by one variable
 
-model.data.ineq <- model.data %>% select(-c(total_resources_income_pc, gdp_verylow_firstoil_year, L_total_resources_income_pc)) %>% mutate(
+model.data.ineq <- model.data %>% select(-c(gdp_verylow_firstoil_year)) %>% mutate(
   D_very_unequal_utip = very_unequal_utip - L_very_unequal_utip,  
   unequal_L_Fiscal_Rel_interp = L_very_unequal_utip * L_Fiscal_Rel_interp,
   unequal_D_Fiscal_Rel_Interp = D_very_unequal_utip * D_Fiscal_Rel_Interp) %>% select( -c(very_unequal_utip))
@@ -117,7 +116,7 @@ toc()
 save(model_ineq, file ="~/Dropbox/BayesChapter/Model_Results/model_ineq_imp.rda")
 
 ### now interaction with polity lag
-model.data.lag <-  model.data %>% select(-c(very_unequal_utip, L_very_unequal_utip, total_resources_income_pc, L_total_resources_income_pc, gdp_verylow_firstoil_year))  %>% mutate(polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp)
+model.data.lag <-  model.data %>% select(-c(very_unequal_utip, L_very_unequal_utip, gdp_verylow_firstoil_year))  %>% mutate(polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp)
 
 model.data.lag <- dummy_cols(model.data.lag, select_columns = c("hmccode"), remove_first_dummy = TRUE)
 
@@ -134,21 +133,19 @@ model_lag <- brm(formula = formula_lag, data = model.data.lag, family = gaussian
 toc()
 save(model_lag,  file ="~/Dropbox/BayesChapter/Model_Results/model_lag_imp.rda")
 
-### model with all variables but only lags
-### add some more lags for total_fuel_income_pc,total_resources_income_pc, gdp_verylow_firstoil_year, and reserves_interp_area
+### model with all variables 
 model.data.full <-  model.data %>%  group_by(hmccode) %>% mutate(post1980 = case_when(year <= 1980 ~ 0,
                                                                                       year > 1980 ~ 1),
                                                                  D_very_unequal_utip = very_unequal_utip - L_very_unequal_utip,
-                                                                 D_total_resources_income_pc = total_resources_income_pc - L_total_resources_income_pc,
                                                                  post1980_L_Fiscal_Rel_interp = post1980 * L_Fiscal_Rel_interp,
                                                                  post1980_D_Fiscal_Rel_Interp = post1980 * D_Fiscal_Rel_Interp,
-                                                                unequal_L_Fiscal_Rel_interp = L_very_unequal_utip * L_Fiscal_Rel_interp,
+                                                                 unequal_L_Fiscal_Rel_interp = L_very_unequal_utip * L_Fiscal_Rel_interp,
                                                                  unequal_D_Fiscal_Rel_Interp = D_very_unequal_utip * D_Fiscal_Rel_Interp,
-                                                                polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
+                                                                 polity_L_Fiscal_Rel_interp = L_Polity_s_interp * L_Fiscal_Rel_interp,
                                                                  firstoil_L_Fiscal_Rel_interp = gdp_verylow_firstoil_year * L_Fiscal_Rel_interp,
                                                                  firstoil_D_Fiscal_Rel_Interp = gdp_verylow_firstoil_year * D_Fiscal_Rel_Interp)
                                                                  
-model.data.full <- model.data.full %>% select(-c(very_unequal_utip, total_resources_income_pc))                                                                 
+model.data.full <- model.data.full %>% select(-c(very_unequal_utip))                                                                 
 names(model.data.full)                                                                                               
 
 
