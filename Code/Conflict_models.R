@@ -95,7 +95,7 @@ scaled_data  <- bind_cols(select(data, - c( mountains_mean, forest_gc, bdist1,  
 
 
 ###first model, geographic factors
-prior = c(set_prior("student_t(5,0,3)", class = "b"))
+prior = c(set_prior("student_t(5,0,5)", class = "b"))
 
 tic()
 model_geo <- brm(formula = ucdp_event ~ petroleum_y + diamprim_y + diamsec_y + gem_y + drug_y + petroleum_s + diamprim_s + diamsec_s + gem_s + log_pop + gcp_ppp + (1 |gwno + year), data = scaled_data, family = bernoulli("logit"), warmup = 2000, iter = 4000, chains = 4, cores = 4, save_all_pars =T, prior = prior, control = list(adapt_delta = 0.99))
