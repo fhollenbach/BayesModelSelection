@@ -23,6 +23,9 @@ summary(m3)
 m4  <- lm(sqtransform ~ transfpartycartelclosedrulepred + transinflxpartunitblock + 0, data = data)
 summary(m4)
 
+data <- data %>% select(c(L_sqtransform, transfloormedianslocationpredict, transfpivotalgridlocklocationpre, transfpartycartelopenrule, transfpartycartelclosedrulepred, transinflxmedgrid, transinflxpartunitblock, congress, issue))
+data <- na.omit(data)
+
 #### subset to those variables used later, so that we can omit all missing data
 prior = c(set_prior("normal(0,5)", class = "b"))
 
