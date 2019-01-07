@@ -21,8 +21,8 @@ parameters {
 model{ 
   vector[N] mu = temp_Intercept + Xc * b;
   // priors including all constants 
-  target += normal_lpdf(b | 0,10); 
-  target += normal_lpdf(temp_Intercept | 0,10); 
+  target += normal_lpdf(b | 0,5);
+  target += normal_lpdf(temp_Intercept | 0,5);
     target += student_t_lpdf(sigma | 3, 0, 10)
     - 1 * student_t_lccdf(0 | 3, 0, 10); 
   // likelihood including all constants 
