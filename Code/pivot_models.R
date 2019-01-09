@@ -6,6 +6,8 @@ library(tictoc)
 library(rethinking)
 library(haven)
 library(sjstats)
+library(tidybayes)
+library(bayesplot)
 data <- read_dta("~/Dropbox/BayesChapter/Data/PartiesPivotsPolicies/PartiesPivotsandPolicyReplicationDataV2.dta")
 
 summary(data)
@@ -86,8 +88,26 @@ save(fin_horseshoe, file = "~/Dropbox/BayesChapter/Model_Results/fin_horseshoe.r
 
 color_scheme_set("red")
 ppc_dens_overlay(y = c(model.data.scaled$sqtransform),
-                 yrep = posterior_predict(fin_horseshoe, draws = 500))
+                 yrep = posterior_predict(fin_horseshoe, draws = 50))
 ggsave("~/Dropbox/Apps/Overleaf/Bayesian model selection and averaging/fin_horseshoe_pdens.pdf", width = 10 * 1.618, height = 10)
+
+posterior <- as.array(fin_horseshoe)[,,1:7]
+vars <- c("Median only", "Pivotal politics", "Party cartel open rule", "Party cartel closed rule", "Inflation (median/pivot)", "Inflation (party)", "Sigma")
+dimnames(posterior)[3]$parameters <- vars
+
+plot_title <- ggtitle("Posterior distributions",
+                      "with medians and 95% intervals")
+p <- mcmc_areas(posterior,
+           pars = vars,
+           prob = 0.95) + plot_title + theme_minimal(base_size = 26)
+plot(p)
+ggsave("~/Dropbox/Apps/Overleaf/Bayesian model selection and averaging/horse1.pdf", width = 10 * 1.618, height = 10)
+
+
+p <-  mcmc_intervals(posterior, point_est = "median", prob = 0.9, prob_outer = 0.95, pars = vars) + theme_minimal(base_size = 26)
+plot(p)
+ggsave("~/Dropbox/Apps/Overleaf/Bayesian model selection and averaging/horse2.pdf", width = 10 * 1.618, height = 10)
+
 
 
 forTable <- tidy_stan(fin_horseshoe, prob = c(0.9, 0.95))[1:7, ]
