@@ -53,6 +53,23 @@ save(model6, file = "~/Dropbox/BayesChapter/Model_Results/model6.rda")
 
 
 
+#### mixture model
+mix <- mixture(gaussian, gaussian, gaussian, gaussian)
+
+mixture <- brm(bf(sqtransform ~ -1, mu1 ~ 1 + transfloormedianslocationpredict + transinflxmedgrid , mu2 ~ 1 + transfpivotalgridlocklocationpre + transinflxmedgrid, mu3 ~ 1 + transfpartycartelopenrule + transinflxpartunitblock, mu4 ~ 1 + transfpartycartelclosedrulepred + transinflxpartunitblock), inits = 0, data = data, family = mix, warmup = 3000, iter = 6000, chains = 4, cores = 4, save_all_pars =T, control = list(adapt_delta = 0.99), seed = 12345) 
+
+
+
+
+
+
+m1 <- flexmix(sqtransform ~ -1 + transfloormedianslocationpredict +transfpivotalgridlocklocationpre + transfpartycartelopenrule +transfpartycartelclosedrulepred + transinflxmedgrid + transinflxpartunitblock, data = data, k = 4)
+summary(m1)
+parameters(m1, component = 1)
+parameters(m1, component = 2)
+parameters(m1, component = 3)
+parameters(m1, component = 4)
+
 
 #### mnodel 6 but with horseshoe
 

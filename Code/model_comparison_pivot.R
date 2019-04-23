@@ -14,6 +14,11 @@ load("~/Dropbox/BayesChapter/Model_Results/model4.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model5.rda")
 load("~/Dropbox/BayesChapter/Model_Results/model6.rda")
 
+### add info criteria in brms 
+model1 <- add_ic(model1, ic = c("loo", "waic", "kfold"))
+model2 <- add_ic(model2, ic = c("loo", "waic", "kfold"))
+model3 <- add_ic(model3, ic = c("loo", "waic", "kfold"))
+model4 <- add_ic(model4, ic = c("loo", "waic", "kfold"))
 
 
 ##model 1
@@ -146,68 +151,66 @@ info_4 <- info_crit(model4, file = "~/Documents/GitHub/BayesModelSelection/code/
 info_5  <- info_crit(model5, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sample_normal.stan")
 info_6  <- info_crit_RE(model6, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sampleRE.stan")
 
+
+### Table BIC
+table.bic <- tibble(Model =  c("Model 1", "Model 2", "Model 3", "Model 4"), BIC = c(info_1$BIC, info_2$BIC, info_3$BIC, info_4$BIC), Dif = c("M3/M1", "M3/M2", NA, "M3/M4"), BF = c((info_1$BIC - info_3$BIC) / 2, (info_2$BIC - info_3$BIC) / 2, NA, (info_4$BIC - info_3$BIC) / 2))
+table <- t(as.matrix(table.bic))
+table  <- xtable(table, caption = "BIC and Approximation to Bayes Factor", label = "tab:bic", align = "lcccc")
+print(table,  include.rownames = FALSE, include.colnames = FALSE, booktabs = TRUE)
+
+
+
+
+##### marginal likelihood and bayes factor from bridge sampling
+ml1 <- bridge_sampler(model1, log = TRUE)
+ml2 <- bridge_sampler(model2, log = TRUE)
+ml3 <- bridge_sampler(model3, log = TRUE)
+ml4 <- bridge_sampler(model4, log = TRUE)
+
+
+## Table BF
+bf31 <- bayes_factor(model3, model1, log = TRUE)
+bf32 <- bayes_factor(model3, model2, log = TRUE)
+bf34 <- bayes_factor(model3, model4, log = TRUE)
+
+
+table.bridge <- tibble(Model =  c("Model 1", "Model 2", "Model 3", "Model 4"), LogMarginalLikelihood  = c( ml1$logml,  ml2$logml,  ml3$logml,  ml4$logml), dif = c("M3/M1", "M3/M2", NA, "M3/M4"), BF = c(bf31$bf, bf32$bf,NA, bf34$bf))
+
+table <- t(as.matrix(table.bridge))
+table  <- xtable(table, caption = "Log Marginal Likelihood and Bayes Factor using Bridgesampling", label = "tab:bridge", align = "lcccc")
+print(table,  include.rownames = FALSE, include.colnames = FALSE, booktabs = TRUE)
+
+
+table.bf <- as.tibble(matrix(c(bf31$bf, bf32$bf, bf34$bf),nrow= 1,ncol=3))
+names(table.bf) <- c("M3/M1", "M3/M2", "M3/M4")#  <-as.tibble(matrix(c("Model 1", "Model 2", "Model 3", "Model 4"),nrow=1))
+
+table  <- xtable(table.bf, caption = "Bayes Factor Model Comparison", label = "tab:bf", align = "lccc")
+print(table,  include.rownames = FALSE, include.colnames = TRUE, booktabs = TRUE)
+
 ####
-### make Table with info criteria
-models_criteria <- bind_rows(info_1, info_2, info_3, info_4, info_5, info_6)
-Model  <-as.tibble(c("Model 1", "Model 2", "Model 3", "Model 4", "Full Model", "Full Model RE"))
-names(Model) <- "Model"
-models_criteria <- bind_cols(Model, models_criteria)
+### make Table with info criteria loo, kfold, waic
 
-table  <- xtable(models_criteria, digits = 1, caption = "Information Critera", label = "tab:infoCrit", align = "lccccc")
-print(table, include.rownames = FALSE, booktabs = TRUE)
+table <- tibble(Model =  c("Model 1", "Model 2", "Model 3", "Model 4"), loo = c(model1$loo$estimates[3,1], model2$loo$estimates[3,1], model3$loo$estimates[3,1], model4$loo$estimates[3,1]), waic = c(model1$waic$estimates[3,1], model2$waic$estimates[3,1], model3$waic$estimates[3,1], model4$waic$estimates[3,1]), kfold = c(model1$kfold$estimates[3,1], model2$kfold$estimates[3,1], model3$kfold$estimates[3,1], model4$kfold$estimates[3,1]))
 
-
-names(models) <- "Model"
-
-### waic
-waic.1 <- waic(model1)$estimate[3, ]
-waic.2 <- waic(model2)$estimate[3, ]
-waic.3 <- waic(model3)$estimate[3, ]
-waic.4 <- waic(model4)$estimate[3, ]
-waic.5 <- waic(model5)$estimate[3, ]
-waic.6 <- waic(model6)$estimate[3, ]
-
-waic   <- bind_rows(waic.1, waic.2, waic.3, waic.4, waic.5, waic.6)
-Model  <-as.tibble(c("Model 1", "Model 2", "Model 3", "Model 4", "Full Model", "Full Model RE"))
-names(Model) <- "Model"
-models_waic <- bind_cols(Model, waic)
-
-table  <- xtable(models_waic, digits = 2, caption = "WAIC for all Models", label = "tab:waic", align = "llcc")
-print(table, include.rownames = FALSE, booktabs = TRUE)
-save(models_waic, file = "~/Dropbox/BayesChapter/Model_Results/waic_res.rda")
-
-### kfold
-
-kfold_cross  <- kfold(model1, model2, model3, model4, model5, model6, compare = TRUE, k = 10)
+table <- t(as.matrix(table))
+table  <- xtable(table, caption = "Information Criteria for Evaluating Theories of Congress", label = "tab:ics", align = "lcccc")
+print(table,  include.rownames = TRUE, include.colnames = FALSE, booktabs = TRUE)
 
 
-kfold.1 <- kfold_cross$model1$estimate[3,]
-kfold.2 <- kfold_cross$model2$estimate[3,]
-kfold.3 <- kfold_cross$model3$estimate[3,]
-kfold.4 <- kfold_cross$model4$estimate[3,]
-kfold.5 <- kfold_cross$model5$estimate[3,]
-kfold.6 <- kfold_cross$model6$estimate[3,]
+comp <- compare_ic(model1, model2, model3, model4, ic= "loo")
+names(comp)
+
+table <- tibble(Model =  c("Model 1", "Model 2", "Model 3", "Model 4", "Model 1 - Model 2", "Model 1 - Model 3", "Model 1 - Model 4", "Model 2 - Model 3", "Model 2 - Model 4", "Model 3 - Model 4"), looic = c(comp$model1$estimates[3,1], comp$model2$estimates[3,1], comp$model3$estimates[3,1], comp$model4$estimates[3,1], comp$ic_diffs__[1,1], comp$ic_diffs__[2,1], comp$ic_diffs__[3,1], comp$ic_diffs__[4,1], comp$ic_diffs__[5,1], comp$ic_diffs__[6,1]), SE = c(comp$model1$estimates[3,2], comp$model2$estimates[3,2], comp$model3$estimates[3,2], comp$model4$estimates[3,2], comp$ic_diffs__[1,2], comp$ic_diffs__[2,2], comp$ic_diffs__[3,2], comp$ic_diffs__[4,2], comp$ic_diffs__[5,2], comp$ic_diffs__[6,2]))
+table  <- xtable(table, caption = "Loo Information Criteria for Evaluating Theories of Congress with Standard Errors", label = "tab:loo", align = "lccc", digits = 1)
+print(table,  include.rownames = FALSE, include.colnames = TRUE, booktabs = TRUE)
 
 
-kfold <- bind_rows(kfold.1, kfold.2, kfold.3, kfold.4, kfold.5, kfold.6)
-Model  <-as.tibble(c("Model 1", "Model 2", "Model 3", "Model 4", "Full Model", "Full Model RE"))
-names(Model) <- "Model"
-models_kfold <- bind_cols(Model, kfold)
-
-table  <- xtable(models_kfold, digits = 2, caption = "Kfold Crossvalidation for all Models", label = "tab:kfold", align = "llcc")
-print(table, include.rownames = FALSE, booktabs = TRUE)
+loo_list <- list(model1$loo, model2$loo, model3$loo, model4$loo)
+stack  <- loo_model_weights(loo_list,method = c("stacking"))
 
 
+table <- tibble(Model =  c("Model 1", "Model 2", "Model 3", "Model 4"), stack = round(c(stack[[1]], stack[[2]], stack[[3]], stack[[4]]), 2))
 
-### looo
-
-loo_models  <- loo(model1, model2, model3, model4, model5, model6, compare = TRUE, reloo = TRUE)
-
-loo  <- bind_rows(loo_models$model1$estimate[1, ], loo_models$model2$estimate[1, ], loo_models$model3$estimate[1, ], loo_models$model4$estimate[1, ], loo_models$model5$estimate[1, ], loo_models$model6$estimate[1, ])
-Model  <-as.tibble(c("Model 1", "Model 2", "Model 3", "Model 4", "Full Model", "Full Model RE"))
-names(Model) <- "Model"
-models_loo <- bind_cols(Model, waic)
-
-table  <- xtable(models_loo, digits = 2, caption = "Psis-Loo ELPD for all Models", label = "tab:loo", align = "llcc")
-print(table, include.rownames = FALSE, booktabs = TRUE)
-save(models_loo, file = "~/Dropbox/BayesChapter/Model_Results/loo_res.rda")
+table <- t(as.matrix(table))
+table  <- xtable(table, caption = "Model Weights Based on Stacking", label = "tab:stacking", align = "lcccc")
+print(table,  include.rownames = FALSE, include.colnames = FALSE, booktabs = TRUE)
