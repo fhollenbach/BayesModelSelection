@@ -1,18 +1,34 @@
-library(bayesplot)
-library(brms)
-library(rethinking)
-library(tidyverse)
-library(tidybayes)
+################################################################
+################################################################
+######  This file estimates model comparisons             ######
+######         and generates Tables                       ######
+######     in Hollenbach & Montgomery 2019                ######
+################################################################
+################################################################
+library(here)
+library(conflicted)
 library(xtable)
+library(tidyverse)
+library(brms)
+library(tidybayes)
+library(rstan)
+conflict_prefer("extract", "rstan")
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+conflict_prefer("Position", "base")
 
-source("~/Documents/GitHub/BayesModelSelection/code/info_functions.R")
+library(bayesplot)
+library(rethinking)
+library(tidybayes)
 
-load("~/Dropbox/BayesChapter/Model_Results/model1.rda")
-load("~/Dropbox/BayesChapter/Model_Results/model2.rda")
-load("~/Dropbox/BayesChapter/Model_Results/model3.rda")
-load("~/Dropbox/BayesChapter/Model_Results/model4.rda")
-load("~/Dropbox/BayesChapter/Model_Results/model5.rda")
-load("~/Dropbox/BayesChapter/Model_Results/model6.rda")
+source(here("code", "info_functions.R"))
+
+load(here("Results", "model1.rda"))
+load(here("Results", "model2.rda"))
+load(here("Results", "model3.rda"))
+load(here("Results", "model4.rda"))
+load(here("Results", "model5.rda"))
+load(here("Results", "model6.rda"))
 
 ### add info criteria in brms 
 model1 <- add_ic(model1, ic = c("loo", "waic", "kfold"))
@@ -144,12 +160,12 @@ tab  <- xtable(results,  caption = "Model Results and 95 Credible Intervals", la
 print(tab, include.rownames = FALSE, booktabs = TRUE)
 
 ### deivance based on median estimate aic, dic, bic,
-info_1  <- info_crit(model1, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sample_normal.stan")
-info_2 <- info_crit(model2, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sample_normal.stan")
-info_3 <- info_crit(model3, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sample_normal.stan")
-info_4 <- info_crit(model4, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sample_normal.stan")
-info_5  <- info_crit(model5, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sample_normal.stan")
-info_6  <- info_crit_RE(model6, file = "~/Documents/GitHub/BayesModelSelection/code/deviance_sampleRE.stan")
+info_1  <- info_crit(model1, file = here("Code", "deviance_sample_normal.stan"))
+info_2 <- info_crit(model2, file = here("Code", "deviance_sample_normal.stan"))
+info_3 <- info_crit(model3, file =here("Code", "deviance_sample_normal.stan"))
+info_4 <- info_crit(model4, file = here("Code", "deviance_sample_normal.stan"))
+info_5  <- info_crit(model5, file = here("Code", "deviance_sample_normal.stan"))
+info_6  <- info_crit_RE(model6, file = here("Code", "deviance_sampleRE.stan"))
 
 
 ### Table BIC
